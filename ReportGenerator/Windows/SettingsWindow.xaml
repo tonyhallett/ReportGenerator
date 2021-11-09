@@ -1,0 +1,85 @@
+﻿<Window x:Class="ReportGenerator.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReportGenerator"
+        mc:Ignorable="d"
+        Title="Settings" Height="820" Width="1000"
+        Name="settingsWindow"
+        d:DataContext ="{d:DesignInstance {x:Type local:DesignTimeSettingsViewModel}, IsDesignTimeCreatable=True}"
+        Visibility="{Binding Ready, Converter={StaticResource BooleanToVisibilityConverter}}"
+        >
+    <Window.Resources>
+        <local:ResourceConverter x:Key="resourceConverter"/>
+        <DataTemplate x:Key="SelectableReportPartsViewModelTemplate" DataType="{x:Type local:SelectableReportPartsViewModel}">
+            <ListBox
+                ItemsSource="{Binding ReportPartViewModels}" 
+                SelectedItem="{Binding SelectedReportPart}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Margin="10, 0,0,0" Width="50" Height="5" Fill="{Binding SelectedThemeColour.Color,Converter={StaticResource ColorToSolidBrushConverter}}"/>
+                                <Label Content="{Binding Name}"/>
+                            </StackPanel>
+                            <ComboBox Visibility="{Binding Selected, Converter={StaticResource BooleanToVisibilityConverter}}" Name="comboBox1"
+            ItemsSource="{Binding ThemeColours}"
+            SelectedItem="{Binding SelectedThemeColour}"
+                
+        >
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Rectangle Margin="10,0,10,0" Width="50" Height="5" Fill="{Binding Color,Converter={StaticResource ColorToSolidBrushConverter}}"/>
+                                            <TextBlock Text="{Binding Name}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0" ItemsSource="{Binding SettingsMenuViewModel.MenuItems}" UsesItemContainerTemplate="True">
+            <Menu.Resources>
+                <ItemContainerTemplate DataType="{x:Type local:SeparatorViewModel}">
+                    <Separator/>
+                </ItemContainerTemplate>
+                <ItemContainerTemplate DataType="{x:Type local:RootMenuItemViewModel}">
+                    <MenuItem Header="{Binding Path=HeaderText}" UsesItemContainerTemplate="True" ItemsSource="{Binding Children}"/>
+                </ItemContainerTemplate>
+                
+                <ItemContainerTemplate DataType="{x:Type local:MenuItemViewModel}">
+                    <MenuItem IsCheckable="False" IsEnabled="{Binding Enabled}" IsChecked="{Binding Selected}" Header="{Binding HeaderText}" Command="{Binding ExecuteCommand}" Icon="{Binding IconName, Converter={StaticResource resourceConverter}}"/>
+                </ItemContainerTemplate>
+            </Menu.Resources>
+        </Menu>
+        <ContentControl Grid.Row="1" Content="{Binding SelectableReportPartsViewModel}" ContentTemplate="{StaticResource ResourceKey=SelectableReportPartsViewModelTemplate}"/>
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <Label>Selected Theme: </Label>
+                    <Label Content="{Binding StatusBarViewModel.SelectedTheme}"/>
+                </StackPanel>
+            </StatusBarItem>
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <Label>Selected settings:</Label>
+                    <Label Content="{Binding StatusBarViewModel.SelectedSetting}"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+        
+    </Grid>
+</Window>
