@@ -47,5 +47,11 @@
         string TextBoxColour { get; }
 
         string TextBoxTextColour { get; }
+
+        string SliderLeftColour { get; }
+
+        string SliderRightColour { get; }
+
+        string SliderThumbColour { get; }
     }
 }

@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ReportParts>
+  <ReportPart Name="SliderLeftColour" SelectedThemeColourName="EnvironmentColors.ToolWindowTextColorKey" />
+  <ReportPart Name="SliderRightColour" SelectedThemeColourName="EnvironmentColors.ToolWindowTextColorKey" />
+  <ReportPart Name="SliderThumbColour" SelectedThemeColourName="EnvironmentColors.ScrollBarThumbBackgroundColorKey" />
   <ReportPart Name="ScrollBarArrowColour" SelectedThemeColourName="EnvironmentColors.ScrollBarArrowBackgroundColorKey" />
   <ReportPart Name="ScrollBarTrackColour" SelectedThemeColourName="EnvironmentColors.ScrollBarBackgroundColorKey" />
   <ReportPart Name="ScrollBarThumbColour" SelectedThemeColourName="EnvironmentColors.ScrollBarThumbBackgroundColorKey" />

@@ -33,6 +33,9 @@
         public string ScrollBarArrow;
         public string ScrollBarTrack;
         public string ScrollBarThumb;
+        public string SliderLeftColour;
+        public string SliderRightColour;
+        public string SliderThumbColour;
 #pragma warning restore SA1401 // Fields should be private
 #pragma warning restore IDE0079 // Remove unnecessary suppression
     }

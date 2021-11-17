@@ -59,6 +59,12 @@
 
         public string TextBoxBorderColour => GetColour();
 
+        public string SliderLeftColour => GetColour();
+
+        public string SliderRightColour => GetColour();
+
+        public string SliderThumbColour => GetColour();
+
         private string GetColour([CallerMemberName] string name = "")
         {
             var colour = reportParts.Single(rp => rp.Name == name).SelectedThemeColour.Color;

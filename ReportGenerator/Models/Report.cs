@@ -68,7 +68,11 @@ namespace ReportGenerator
 
                 ScrollBarArrow = reportColours.ScrollBarArrowColour,
                 ScrollBarTrack = reportColours.ScrollBarTrackColour,
-                ScrollBarThumb = reportColours.ScrollBarThumbColour
+                ScrollBarThumb = reportColours.ScrollBarThumbColour,
+
+                SliderLeftColour = reportColours.SliderLeftColour,
+                SliderRightColour = reportColours.SliderRightColour,
+                SliderThumbColour = reportColours.SliderThumbColour
             };
 
             webBrowser.InvokeScript(ColoursChangedJSFunctionName, jsColours);
@@ -82,7 +86,15 @@ namespace ReportGenerator
             this.webBrowser.NavigateToString(processed);
             return processed;
         }
+        private string HackGroupingToAllowAll(int max)
+        {
+            return $@"
+							var customizeBox = document.getElementsByClassName('customizebox')[0];
+							var groupingInput = customizeBox.querySelector('input');
+							groupingInput.max = {max};
+			";
 
+        }
         public string ProcessUnifiedHtml(string htmlForProcessing)
         {
             var (cyclomaticThreshold, crapScoreThreshold, nPathThreshold) = HotspotThresholds();
@@ -131,6 +143,7 @@ namespace ReportGenerator
             assembliesToReplace = assembliesToReplace.Substring(0, endIndex + 1);
 
             var assemblies = JArray.Parse(assembliesToReplace);
+            var levels = 0;
             foreach (JObject assembly in assemblies)
             {
                 var assemblyName = assembly["name"];
@@ -146,9 +159,14 @@ namespace ReportGenerator
                     }
                     else
                     {
+                        var parts = className.Split('.').Length;
+                        if (parts > levels)
+                        {
+                            levels = parts;
+                        }
                         // simplify name
-                        var lastIndexOfDotInName = className.LastIndexOf('.');
-                        if (lastIndexOfDotInName != -1) @class["name"] = className.Substring(lastIndexOfDotInName).Trim('.');
+                        //var lastIndexOfDotInName = className.LastIndexOf('.');
+                        //if (lastIndexOfDotInName != -1) @class["name"] = className.Substring(lastIndexOfDotInName).Trim('.');
 
                         //mark with # and add the assembly name
                         var rp = @class["rp"].ToString();
@@ -204,12 +222,28 @@ namespace ReportGenerator
 					table,tr,th,td {{ font-size: small; }}
 					body {{ -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none }}
 					table.overview th, table.overview td {{ font-size: small; white-space: nowrap; word-break: normal; padding-left:10px;padding-right:10px; }}
-					coverage-info div.customizebox div:nth-child(2) {{ opacity:0;font-size:1px;height:1px;padding:0;border:0;margin:0 }}
-					coverage-info div.customizebox div:nth-child(2) * {{ opacity:0;font-size:1px;height:1px;padding:0;border:0;margin:0 }}
+					/* coverage-info div.customizebox div:nth-child(2) {{ opacity:0;font-size:1px;height:1px;padding:0;border:0;margin:0 }}*/
+					/* coverage-info div.customizebox div:nth-child(2) * {{ opacity:0;font-size:1px;height:1px;padding:0;border:0;margin:0 }} */
 					table,tr,th,td {{ border: 1px solid; font-size: small; }}
 					input[type=text] {{ color:{reportColours.TextBoxTextColour}; background-color:{reportColours.TextBoxColour};border-color:{reportColours.TextBoxBorderColour} }}
 					select {{ color:{reportColours.ComboBoxTextColour}; background-color:{reportColours.ComboBoxColour};border-color:{reportColours.ComboBoxBorderColour} }}
-                    body, html {{ scrollbar-arrow-color:{reportColours.ScrollBarArrowColour};scrollbar-track-color:{reportColours.ScrollBarTrackColour};scrollbar-face-color:{scrollbarThumbColour};scrollbar-shadow-color:{scrollbarThumbColour};scrollbar-highlight-color:{scrollbarThumbColour};scrollbar-3dlight-color:{scrollbarThumbColour};scrollbar-darkshadow-color:{scrollbarThumbColour} }}				
+                    body, html {{ scrollbar-arrow-color:{reportColours.ScrollBarArrowColour};scrollbar-track-color:{reportColours.ScrollBarTrackColour};scrollbar-face-color:{scrollbarThumbColour};scrollbar-shadow-color:{scrollbarThumbColour};scrollbar-highlight-color:{scrollbarThumbColour};scrollbar-3dlight-color:{scrollbarThumbColour};scrollbar-darkshadow-color:{scrollbarThumbColour} }}	
+                    input[type=range]::-ms-thumb {{
+					  background: {reportColours.SliderThumbColour};
+					  border: {reportColours.SliderThumbColour};
+					}}
+					input[type=range]::-ms-track {{
+						color: transparent;
+						border-color: transparent;
+						background: transparent;
+					}}
+					
+					input[type=range]::-ms-fill-lower {{
+					  background: {reportColours.SliderLeftColour};  
+					}}
+					input[type=range]::-ms-fill-upper {{
+					  background: {reportColours.SliderRightColour}; 
+					}}
 </style>
 				</head>
 			");
@@ -241,6 +275,7 @@ namespace ReportGenerator
 
             htmlSb.Replace("</body>", $@"
 				<script type=""text/javascript"">
+                    {HackGroupingToAllowAll(levels)}
 					function getRuleBySelector(cssRules,selector){{
 						for(var i=0;i<cssRules.length;i++){{
 							if(cssRules[i].selectorText == selector){{
@@ -267,6 +302,14 @@ namespace ReportGenerator
 							getStyleBySelector(highContrastRules,'table.coverage > td.gray').setProperty('background-color',colours.{nameof(JsColours.GrayCoverage)});
 
 							var fccStyleSheet1Rules = getStyleSheetById('fccStyle1').cssRules;		
+
+                            var rangeInputFillLower = getStyleBySelector(fccStyleSheet1Rules, 'input[type=range]::-ms-fill-lower');
+							rangeInputFillLower.setProperty('background',colours.{nameof(JsColours.SliderLeftColour)});
+							var rangeInputFillUpper = getStyleBySelector(fccStyleSheet1Rules, 'input[type=range]::-ms-fill-upper');
+							rangeInputFillUpper.setProperty('background',colours.{nameof(JsColours.SliderRightColour)});
+							var rangeInputThumb = getStyleBySelector(fccStyleSheet1Rules, 'input[type=range]::-ms-thumb');
+							rangeInputThumb.setProperty('background',colours.{nameof(JsColours.SliderThumbColour)});
+							rangeInputThumb.setProperty('border',colours.{nameof(JsColours.SliderThumbColour)});
 					
 							var scrollBarStyle = getStyleBySelector(fccStyleSheet1Rules,'body, html');
 							scrollBarStyle.setProperty('scrollbar-arrow-color',colours.{nameof(JsColours.ScrollBarArrow)});
